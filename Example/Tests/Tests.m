@@ -66,6 +66,34 @@ describe(@"Firebase Integration", ^{
         }];
     });
 
+    it(@"track with event name and parmas separated by periods", ^{
+        SEGTrackPayload *payload = [[SEGTrackPayload alloc] initWithEvent:@"Starship.Ordered"
+                                                               properties:@{
+                                                                            @"Starship.Type" : @"Death Star"
+                                                                            }
+                                                                  context:@{}
+                                                             integrations:@{}];
+
+        [integration track:payload];
+        [verify(mockFirebase) logEventWithName:@"Starship_Ordered" parameters:@{
+                                                                                @"Starship_Type" : @"Death Star"
+                                                                                }];
+    });
+
+    it(@"track with leading and trailing spacing for event name", ^{
+        SEGTrackPayload *payload = [[SEGTrackPayload alloc] initWithEvent:@"   Starship Ordered  "
+                                                               properties:@{
+                                                                            @"Starship.Type" : @"Death Star"
+                                                                            }
+                                                                  context:@{}
+                                                             integrations:@{}];
+
+        [integration track:payload];
+        [verify(mockFirebase) logEventWithName:@"Starship_Ordered" parameters:@{
+                                                                                @"Starship_Type" : @"Death Star"
+                                                                                }];
+    });
+
     it(@"track Order Completed", ^{
         SEGTrackPayload *payload = [[SEGTrackPayload alloc] initWithEvent:@"Order Completed" properties:@{
             @"checkout_id" : @"9bcf000000000000",
@@ -306,6 +334,30 @@ describe(@"Firebase Integration", ^{
         }];
     });
 
+    it(@"track Promotion Viewed", ^{
+        SEGTrackPayload *payload = [[SEGTrackPayload alloc] initWithEvent:@"Promotion Viewed"
+            properties:@{
+                @"product_id" : @"507f1f77bcf86cd799439011",
+                @"category" : @"Games",
+                @"name" : @"Monopoly 3rd Edition",
+                @"price" : @18.99,
+                @"quantity" : @1,
+                @"currency" : @"usd",
+            }
+            context:@{}
+            integrations:@{}];
+
+        [integration track:payload];
+        [verify(mockFirebase) logEventWithName:@"present_offer" parameters:@{
+            @"item_id" : @"507f1f77bcf86cd799439011",
+            @"item_category" : @"Games",
+            @"item_name" : @"Monopoly 3rd Edition",
+            @"price" : @18.99,
+            @"quantity" : @1,
+            @"currency" : @"usd",
+        }];
+    });
+
     it(@"track Payment Info Entered", ^{
         SEGTrackPayload *payload = [[SEGTrackPayload alloc] initWithEvent:@"Payment Info Entered"
             properties:@{
@@ -501,6 +553,15 @@ describe(@"Firebase Integration", ^{
         [verify(mockFirebase) logEventWithName:@"search" parameters:@{
             @"search_term" : @"blue hotpants"
         }];
+    });
+
+    it(@"track screen with name", ^{
+        SEGScreenPayload *payload = [[SEGScreenPayload alloc] initWithName:@"Home screen"
+                                                                properties:@{}
+                                                                   context:@{}
+                                                              integrations:@{}];
+        [integration screen:payload];
+        [verify(mockFirebase) setScreenName:@"Home screen" screenClass:nil];
     });
 
 });
